@@ -240,6 +240,7 @@ def insertClassTime(attrDict,connection,cursor):
         insert or ignore into classTimes values
         (?,?,?,?,?,?,?,?,?,?)
         ''',(
+            None,               #Use an auto incrementing id
             int(getVal(attrDict,"term")),
             int(getVal(attrDict,"course")),
             int(getVal(attrDict,"class")),
@@ -263,10 +264,10 @@ def insertTextbook(attrDict,connection,cursor):
             int(getVal(attrDict,"course")),
             int(getVal(attrDict,"class")),
             getVal(attrDict,"textbook"),
-            getVal(attrDict,"uOfATxStatus"),
-            getVal(attrDict,"uOfATxTitle"),
-            getVal(attrDict,"uOfATxISBN"),
-            getVal(attrDict,"uOfATxAuthor"),
+            getVal(attrDict,"uOfATxStatus",True),
+            getVal(attrDict,"uOfATxTitle",True),
+            getVal(attrDict,"uOfATxISBN",True),
+            getVal(attrDict,"uOfATxAuthor",True),
             getVal(attrDict,"uOfATxPublisher",True),
             getVal(attrDict,"uOfATxEdition",True),
             getVal(attrDict,"uOfATxYear",True),

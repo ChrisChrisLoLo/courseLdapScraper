@@ -106,7 +106,7 @@ def main():
                                serverctrls=[page_control])
 
         for textbookDn,textbookAttr in textbookList:
-            insertClassTime(textbookAttr,dbCon,dbCurs)
+            insertTextbook(textbookAttr,dbCon,dbCurs)
 
 
     print("hihi")

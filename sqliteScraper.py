@@ -14,15 +14,19 @@ dbCon,dbCurs = connect("./calendar.db")
 drop_tables(dbCon,dbCurs)
 define_tables(dbCon,dbCurs)
 
-
 def main():
     #If this line fails then the service is likely gone or moved
     ldapCon = ldap.initialize(DOMAIN)
     #ldapCon.get_attributes()
     
-    print(ldapCon.compare_s(ROOT_DN,"ou", b"1370"))
-    dn="term=1326,ou=calendar,dc=ualberta,dc=ca"
-    print(ldapCon.compare_s(dn,"term", b"1326"))
+
+    #testing inserting a sample class
+    # sampleClassDn = "course=000001,term=1370,ou=calendar,dc=ualberta,dc=ca"
+    # classList = ldapCon.search_s(sampleClassDn,ldap.SCOPE_ONELEVEL)
+
+    # for classDn,classAttr in classList:
+    #     insertClass(classAttr,dbCon,dbCurs)
+
 
     '''
     https://ldap.com/basic-ldap-concepts/
@@ -38,6 +42,8 @@ def main():
     dn="term=1326,ou=calendar,dc=ualberta,dc=ca"
     print(ldapCon.compare_s(dn,"term", b"1326"))
     '''
+    
+
 
     #initialize lists
     termDnList = []
@@ -56,10 +62,6 @@ def main():
     
     #Find all children of the terms and add them to the db
     for termDn in termDnList:
-        # courseList = ldapCon.search_ext_s("term=1370,ou=calendar,dc=ualberta,dc=ca",
-        #                        ldap.SCOPE_ONELEVEL,
-        #                        "(objectClass=uOfACourse)", [],
-        #                        serverctrls=[page_control])
 
         #There can be over 1000 entries for courses, so must use pagination to get results.
         #For some reason it is possible to abuse pagination by having a page size > 1000 and
@@ -74,7 +76,7 @@ def main():
 
         print(courseList)
         for courseDn,courseAttr in courseList:
-            
+
             # print(course)
             # print(courseDn)
             #print(courseAttr)
@@ -85,10 +87,16 @@ def main():
     for courseDn in courseDnList:
         classList = ldapCon.search_s(courseDn,ldap.SCOPE_ONELEVEL)
 
+        for classDn,classAttr in classList:
+            insertClass(classAttr,dbCon,dbCurs)
+            classDnList.append(classDn)
 
     
-    print()
+
     print("hihi")
+
+
+
 
 if __name__== "__main__":
     main()

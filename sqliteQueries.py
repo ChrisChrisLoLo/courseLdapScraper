@@ -71,6 +71,9 @@ def define_tables(connection, cursor):
             session         varchar(33),
             campus          varchar(4),
             location        varchar(32),
+            autoEnroll      varchar(5),
+            classTopic      varchar(64),
+            classNotes      varchar(400),
             consent         varchar(16),
             gradingBasis    varchar(16),
             instructionMode varchar(16),
@@ -129,24 +132,37 @@ def define_tables(connection, cursor):
     connection.commit()
     return
 
+#Gets value from dictionary, and sets value to None if the optional parameter is set
+def getVal(attrDict,key,optional=False):
+    if optional:
+        try:
+            optionalVal = attrDict[key][0].decode('utf-8')
+        except KeyError:
+            optionalVal = None
+        return optionalVal
+    else:
+       return attrDict[key][0].decode('utf-8')
+
 def insertTerm(attrDict,connection,cursor):
-    #print(attrDict)
+    print(attrDict)
     cursor.execute('''
         insert into terms values
         (?,?,?,?);
         ''',(
-            attrDict["term"][0].decode('utf-8'),
-            attrDict["termTitle"][0].decode('utf-8'),
-            attrDict["startDate"][0].decode('utf-8'),
-            attrDict["endDate"][0].decode('utf-8')
+            getVal(attrDict,"term"),
+            getVal(attrDict,"termTitle"),
+            getVal(attrDict,"startDate"),
+            getVal(attrDict,"endDate")
             ))
 
 
     connection.commit()
     return
 
+
+
 def insertCourse(attrDict,connection,cursor):
-    # print(attrDict)
+    print(attrDict)
     try:
         optCourseDesc = attrDict["courseDescription"][0].decode('utf-8')
     except KeyError:
@@ -156,22 +172,61 @@ def insertCourse(attrDict,connection,cursor):
         insert or ignore into courses values
         (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         ''',(
-            attrDict["term"][0].decode('utf-8'),
-            attrDict["course"][0].decode('utf-8'),
-            attrDict["subject"][0].decode('utf-8'),
-            attrDict["subjectTitle"][0].decode('utf-8'),
-            attrDict["catalog"][0].decode('utf-8'),
-            attrDict["courseTitle"][0].decode('utf-8'),
-            optCourseDesc,
-            attrDict["facultyCode"][0].decode('utf-8'),
-            attrDict["faculty"][0].decode('utf-8'),
-            attrDict["departmentCode"][0].decode('utf-8'),
-            attrDict["department"][0].decode('utf-8'),
-            attrDict["career"][0].decode('utf-8'),
-            attrDict["units"][0].decode('utf-8'),
-            attrDict["asString"][0].decode('utf-8'),
+            getVal(attrDict,"term"),
+            getVal(attrDict,"course"),
+            getVal(attrDict,"subject"),
+            getVal(attrDict,"subjectTitle"),
+            getVal(attrDict,"catalog"),
+            getVal(attrDict,"courseTitle"),
+            getVal(attrDict,"courseDescription",True),
+            getVal(attrDict,"facultyCode"),
+            getVal(attrDict,"faculty"),
+            getVal(attrDict,"departmentCode"),
+            getVal(attrDict,"department"),
+            getVal(attrDict,"career"),
+            getVal(attrDict,"units"),
+            getVal(attrDict,"asString")
             ))
 
 
+    connection.commit()
+    return
+
+def insertClass(attrDict,connection,cursor):
+    print(attrDict)
+    cursor.execute('''
+        insert or ignore into classes values
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+        ''',(
+            getVal(attrDict,"term"),
+            getVal(attrDict,"course"),
+            getVal(attrDict,"class"),
+            getVal(attrDict,"section"),
+            getVal(attrDict,"component"),
+            getVal(attrDict,"classType"),
+            getVal(attrDict,"classStatus"),
+            getVal(attrDict,"enrollStatus"),
+            getVal(attrDict,"capacity"),
+            getVal(attrDict,"startDate"),
+            getVal(attrDict,"endDate"),
+            getVal(attrDict,"session"),
+            getVal(attrDict,"campus"),
+            getVal(attrDict,"location"),
+            getVal(attrDict,"autoEnroll",True),
+            getVal(attrDict,"classTopic",True),
+            getVal(attrDict,"classNotes",True),
+            getVal(attrDict,"consent"),
+            getVal(attrDict,"gradingBasis"),
+            getVal(attrDict,"instructionMode"),
+            getVal(attrDict,"units"),
+            getVal(attrDict,"classURL",True),
+            getVal(attrDict,"instructorUId",True),
+            getVal(attrDict,"examStatus",True),
+            getVal(attrDict,"examDate",True),
+            getVal(attrDict,"examStartTime",True),
+            getVal(attrDict,"examEndTime",True),
+            getVal(attrDict,"examLocation",True),
+            getVal(attrDict,"asString")
+            ))
     connection.commit()
     return

@@ -24,13 +24,17 @@ def drop_tables(connection, cursor):
     return
 
 
-# Define and create tables in the given databse
+# Define and create tables in the given database
+# NOTE: one big difference between this schema and the documentation schema is that 
+# the classtime attribute does not appear to exist. This contradicts the documentation.
+# The workaround is to give an autoincrementing int for an id, as it can be assumed that every
+# classTime is unique
 def define_tables(connection, cursor):
     table_query = '''
         PRAGMA foreign_keys = ON;
         
         create table terms (
-            term        char(4),
+            term        int,
             termTitle   varchar(40),
             startDate   date,
             endDate     date,
@@ -38,8 +42,8 @@ def define_tables(connection, cursor):
         );
 
         create table courses (
-            term                char(4),
-            course              char(6),
+            term                int,
+            course              int,
             subject             char(6),
             subjectTitle        varchar(120),
             catalog             char(3),
@@ -57,9 +61,9 @@ def define_tables(connection, cursor):
         );
 
         create table classes (
-            term            char(4),
-            course          char(6),
-            class           char(5),
+            term            int,
+            course          int,
+            class           int,
             section         varchar(5),
             component       char(3),
             classType       char(1),
@@ -92,27 +96,26 @@ def define_tables(connection, cursor):
         );
         
         create table classTimes (
-            term            char(4),
-            course          char(6),
-            class           char(5),
-            classTime       varchar(8),
+            classTime       INTEGER PRIMARY KEY AUTOINCREMENT,
+            term            int,
+            course          int,
+            class           int,
             day             char(7),
             startTime       char(8),
             endTime         char(9),
             location        varchar(16),
             endDate         date,
             startDate       date,
-            primary key (classTime),
-            foreign key (class) references class,
+            foreign key (class) references classes,
             foreign key (course) references courses,
             foreign key (term) references terms   
             
         );
 
         create table textbooks (
-            term            char(4),
-            course          char(6),
-            class           char(5),
+            term            int,
+            course          int,
+            class           int,
             textbook        varchar(16),
             uOfATxStatus    char(3),
             uOfATxTitle     varchar(64),
@@ -122,7 +125,7 @@ def define_tables(connection, cursor):
             uOfATxEdition   int,
             uOfATxYear      int,
             primary key (textbook),
-            foreign key (class) references class,
+            foreign key (class) references classes,
             foreign key (course) references courses,
             foreign key (term) references terms   
         );
@@ -172,8 +175,8 @@ def insertCourse(attrDict,connection,cursor):
         insert or ignore into courses values
         (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         ''',(
-            getVal(attrDict,"term"),
-            getVal(attrDict,"course"),
+            int(getVal(attrDict,"term")),
+            int(getVal(attrDict,"course")),
             getVal(attrDict,"subject"),
             getVal(attrDict,"subjectTitle"),
             getVal(attrDict,"catalog"),
@@ -198,9 +201,9 @@ def insertClass(attrDict,connection,cursor):
         insert or ignore into classes values
         (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         ''',(
-            getVal(attrDict,"term"),
-            getVal(attrDict,"course"),
-            getVal(attrDict,"class"),
+            int(getVal(attrDict,"term")),
+            int(getVal(attrDict,"course")),
+            int(getVal(attrDict,"class")),
             getVal(attrDict,"section"),
             getVal(attrDict,"component"),
             getVal(attrDict,"classType"),
@@ -228,5 +231,45 @@ def insertClass(attrDict,connection,cursor):
             getVal(attrDict,"examLocation",True),
             getVal(attrDict,"asString")
             ))
+    connection.commit()
+    return
+
+def insertClassTime(attrDict,connection,cursor):
+    print(attrDict)
+    cursor.execute('''
+        insert or ignore into classTimes values
+        (?,?,?,?,?,?,?,?,?,?)
+        ''',(
+            int(getVal(attrDict,"term")),
+            int(getVal(attrDict,"course")),
+            int(getVal(attrDict,"class")),
+            getVal(attrDict,"day"),
+            getVal(attrDict,"startTime"),
+            getVal(attrDict,"endTime"),
+            getVal(attrDict,"location",True),
+            getVal(attrDict,"endDate"),
+            getVal(attrDict,"startDate"),
+        ))
+    connection.commit()
+    return
+
+def insertTextbook(attrDict,connection,cursor):
+    print(attrDict)
+    cursor.execute('''
+        insert or ignore into textbooks values
+        (?,?,?,?,?,?,?,?,?,?,?)
+        ''',(
+            int(getVal(attrDict,"term")),
+            int(getVal(attrDict,"course")),
+            int(getVal(attrDict,"class")),
+            getVal(attrDict,"textbook"),
+            getVal(attrDict,"uOfATxStatus"),
+            getVal(attrDict,"uOfATxTitle"),
+            getVal(attrDict,"uOfATxISBN"),
+            getVal(attrDict,"uOfATxAuthor"),
+            getVal(attrDict,"uOfATxPublisher",True),
+            getVal(attrDict,"uOfATxEdition",True),
+            getVal(attrDict,"uOfATxYear",True),
+        ))
     connection.commit()
     return

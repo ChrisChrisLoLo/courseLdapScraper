@@ -11,11 +11,13 @@ def connect(path):
 # Drop all tables in the given database
 def drop_tables(connection, cursor):
     drop_query= '''
+        PRAGMA foreign_keys = OFF;
         drop table if exists terms;
         drop table if exists courses;
         drop table if exists classes;
         drop table if exists classTimes;
         drop table if exists textbooks;
+        PRAGMA foreign_keys = ON;
         '''
     cursor.executescript(drop_query)
     connection.commit()
@@ -127,32 +129,42 @@ def define_tables(connection, cursor):
     connection.commit()
     return
 
-def insertTerm(termDict,connection,cursor):
-    print(termDict)
+def insertTerm(attrDict,connection,cursor):
+    #print(attrDict)
     cursor.execute('''
         insert into terms values
         (?,?,?,?);
         ''',(
-            termDict["term"][0].decode('utf-8'),
-            termDict["termTitle"][0].decode('utf-8'),
-            termDict["startDate"][0].decode('utf-8'),
-            termDict["endDate"][0].decode('utf-8')
+            attrDict["term"][0].decode('utf-8'),
+            attrDict["termTitle"][0].decode('utf-8'),
+            attrDict["startDate"][0].decode('utf-8'),
+            attrDict["endDate"][0].decode('utf-8')
             ))
 
 
     connection.commit()
     return
 
-def insertCourse(termDict,connection,cursor):
-    print(termDict)
+def insertCourse(attrDict,connection,cursor):
+    # print(attrDict)
     cursor.execute('''
-        insert into terms values
-        (?,?,?,?);
+        insert into courses values
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         ''',(
-            termDict["term"][0].decode('utf-8'),
-            termDict["termTitle"][0].decode('utf-8'),
-            termDict["startDate"][0].decode('utf-8'),
-            termDict["endDate"][0].decode('utf-8')
+            attrDict["term"][0].decode('utf-8'),
+            attrDict["course"][0].decode('utf-8'),
+            attrDict["subject"][0].decode('utf-8'),
+            attrDict["subjectTitle"][0].decode('utf-8'),
+            attrDict["catalog"][0].decode('utf-8'),
+            attrDict["courseTitle"][0].decode('utf-8'),
+            attrDict["courseDescription"][0].decode('utf-8'),
+            attrDict["facultyCode"][0].decode('utf-8'),
+            attrDict["faculty"][0].decode('utf-8'),
+            attrDict["departmentCode"][0].decode('utf-8'),
+            attrDict["department"][0].decode('utf-8'),
+            attrDict["career"][0].decode('utf-8'),
+            attrDict["units"][0].decode('utf-8'),
+            attrDict["asString"][0].decode('utf-8'),
             ))
 
 

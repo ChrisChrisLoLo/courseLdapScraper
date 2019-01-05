@@ -6,6 +6,8 @@ DOMAIN = "ldaps://directory.srv.ualberta.ca"
 ROOT_DN="ou=calendar,dc=ualberta,dc=ca"
 ldap.set_option(ldap.OPT_SIZELIMIT,10000)
 print(ldap.get_option(ldap.OPT_SIZELIMIT))
+page_control = ldap.controls.libldap.SimplePagedResultsControl(True, size=3000, cookie='')
+
 
 #Create and initialize sqlite db
 dbCon,dbCurs = connect("./calendar.db")
@@ -57,13 +59,26 @@ def main():
     
     #Find all children of the terms and add them to the db
     for termDn in termDnList:
-        courseList = ldapCon.search_s(termDn,ldap.SCOPE_ONELEVEL)
-        print(courseList)
+        courseList = ldapCon.search_ext_s("term=1370,ou=calendar,dc=ualberta,dc=ca",
+                               ldap.SCOPE_ONELEVEL,
+                               "(objectClass=uOfACourse)", [],
+                               serverctrls=[page_control])
+        # courseList = ldapCon.search_ext_s(termDn,
+        #                        ldap.SCOPE_ONELEVEL,
+        #                        "(objectClass=*)", [],
+        #                        serverctrls=[page_control])
+        #courseList = ldapCon.search_s(termDn,ldap.SCOPE_ONELEVEL)
+        # print(termDn)
+        #print(courseList)
         for course in courseList:
 
             courseDn = course[0]
             courseAttr = course[1]
 
+            # print(course)
+            # print(courseDn)
+            print(courseAttr)
+            print("!!!!!!!!!!")
             insertCourse(courseAttr,dbCon,dbCurs)
             courseDnList.append(courseDn)
 

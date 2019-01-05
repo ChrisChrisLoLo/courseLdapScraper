@@ -147,8 +147,13 @@ def insertTerm(attrDict,connection,cursor):
 
 def insertCourse(attrDict,connection,cursor):
     # print(attrDict)
+    try:
+        optCourseDesc = attrDict["courseDescription"][0].decode('utf-8')
+    except KeyError:
+        optCourseDesc = None
+
     cursor.execute('''
-        insert into courses values
+        insert or ignore into courses values
         (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         ''',(
             attrDict["term"][0].decode('utf-8'),
@@ -157,7 +162,7 @@ def insertCourse(attrDict,connection,cursor):
             attrDict["subjectTitle"][0].decode('utf-8'),
             attrDict["catalog"][0].decode('utf-8'),
             attrDict["courseTitle"][0].decode('utf-8'),
-            attrDict["courseDescription"][0].decode('utf-8'),
+            optCourseDesc,
             attrDict["facultyCode"][0].decode('utf-8'),
             attrDict["faculty"][0].decode('utf-8'),
             attrDict["departmentCode"][0].decode('utf-8'),

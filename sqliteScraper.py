@@ -48,10 +48,7 @@ def main():
 
     #Find all terms add them to the db
     termList = ldapCon.search_s(ROOT_DN,ldap.SCOPE_ONELEVEL)
-    for term in termList:
-        
-        termDn = term[0]
-        termAttr = term[1]
+    for termDn,termAttr in termList:
 
         #Use the attribute dictionary for each term into insertTerm
         insertTerm(termAttr,dbCon,dbCurs)
@@ -63,6 +60,10 @@ def main():
         #                        ldap.SCOPE_ONELEVEL,
         #                        "(objectClass=uOfACourse)", [],
         #                        serverctrls=[page_control])
+
+        #There can be over 1000 entries for courses, so must use pagination to get results.
+        #For some reason it is possible to abuse pagination by having a page size > 1000 and
+        #not have the script throw a max results error, so this is not typical pagination.
         courseList = ldapCon.search_ext_s(termDn,
                                ldap.SCOPE_ONELEVEL,
                                "(objectClass=uOfACourse)", [],
@@ -72,17 +73,18 @@ def main():
         #print(courseList)
 
         print(courseList)
-        for course in courseList:
-
-            courseDn = course[0]
-            courseAttr = course[1]
-
+        for courseDn,courseAttr in courseList:
+            
             # print(course)
             # print(courseDn)
             #print(courseAttr)
             #print("!!!!!!!!!!")
             insertCourse(courseAttr,dbCon,dbCurs)
             courseDnList.append(courseDn)
+    
+    for courseDn in courseDnList:
+        classList = ldapCon.search_s(courseDn,ldap.SCOPE_ONELEVEL)
+
 
     
     print()

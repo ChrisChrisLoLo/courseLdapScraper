@@ -4,7 +4,8 @@ from sqliteQueries import *
 
 DOMAIN = "ldaps://directory.srv.ualberta.ca"
 ROOT_DN="ou=calendar,dc=ualberta,dc=ca"
-
+ldap.set_option(ldap.OPT_SIZELIMIT,10000)
+print(ldap.get_option(ldap.OPT_SIZELIMIT))
 
 #Create and initialize sqlite db
 dbCon,dbCurs = connect("./calendar.db")
@@ -25,6 +26,8 @@ def main():
     https://ldap.com/basic-ldap-concepts/
     https://hub.packtpub.com/configuring-and-securing-python-ldap-applications-part-2/
     https://sites.google.com/a/ualberta.ca/open-data/calendar-data
+    http://www.novell.com/coolsolutions/tip/18274.html
+    https://medium.com/@alpolishchuk/pagination-of-ldap-search-results-with-python-ldap-845de60b90d2
 
     A working example of using ldaps, where dn (distinguished name) is the "directory" that we are entering.
     You can only get attributes that pertains to the current dn, like how you can only access
@@ -54,8 +57,8 @@ def main():
     
     #Find all children of the terms and add them to the db
     for termDn in termDnList:
-        courseList = ldapCon.search(termDN,ldap.SCOPE_ONELEVEL)
-
+        courseList = ldapCon.search_s(termDn,ldap.SCOPE_ONELEVEL)
+        print(courseList)
         for course in courseList:
 
             courseDn = course[0]

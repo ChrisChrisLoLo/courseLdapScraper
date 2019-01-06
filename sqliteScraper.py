@@ -2,10 +2,12 @@ import ldap
 import sqlite3
 from sqliteQueries import *
 
+
+#Create and configure LDAP connection
 DOMAIN = "ldaps://directory.srv.ualberta.ca"
 ROOT_DN="ou=calendar,dc=ualberta,dc=ca"
 ldap.set_option(ldap.OPT_SIZELIMIT,20000)
-print(ldap.get_option(ldap.OPT_SIZELIMIT))
+# print(ldap.get_option(ldap.OPT_SIZELIMIT))
 page_control = ldap.controls.libldap.SimplePagedResultsControl(True, size=20000, cookie='')
 
 
@@ -17,16 +19,6 @@ define_tables(dbCon,dbCurs)
 def main():
     #If this line fails then the service is likely gone or moved
     ldapCon = ldap.initialize(DOMAIN)
-    #ldapCon.get_attributes()
-    
-
-    #testing inserting a sample class
-    # sampleClassDn = "course=000001,term=1370,ou=calendar,dc=ualberta,dc=ca"
-    # classList = ldapCon.search_s(sampleClassDn,ldap.SCOPE_ONELEVEL)
-
-    # for classDn,classAttr in classList:
-    #     insertClass(classAttr,dbCon,dbCurs)
-
 
     '''
     https://ldap.com/basic-ldap-concepts/
@@ -42,15 +34,9 @@ def main():
     dn="term=1326,ou=calendar,dc=ualberta,dc=ca"
     print(ldapCon.compare_s(dn,"term", b"1326"))
     '''
-    
 
-
-    #initialize lists
+    #initialize list
     termDnList = []
-    courseDnList = []
-    classDnList = []
-    classTimeDnList = []
-    textbookDnList = []
 
     #Find all terms add them to the db
     termList = ldapCon.search_s(ROOT_DN,ldap.SCOPE_ONELEVEL)
@@ -74,7 +60,6 @@ def main():
                                [],
                                serverctrls=[page_control])
 
-        print(courseList)
         for courseDn,courseAttr in courseList:
             insertCourse(courseAttr,dbCon,dbCurs)
     
@@ -109,7 +94,7 @@ def main():
             insertTextbook(textbookAttr,dbCon,dbCurs)
 
 
-    print("hihi")
+    print("Data collected successfully")
 
 
 

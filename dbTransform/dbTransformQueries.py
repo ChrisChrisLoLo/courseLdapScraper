@@ -98,9 +98,10 @@ def define_new_tables(connection, cursor):
 
     cursor.execute('''
         create table classes (
+            class           INTEGER PRIMARY KEY AUTOINCREMENT,
             term            int,
             course          int,
-            class           int,
+            classCode       int,
             section         varchar(5),
             component       char(3),
             classType       char(1),
@@ -127,7 +128,6 @@ def define_new_tables(connection, cursor):
             examEndTime     char(8),
             examLocation    varchar(16),
             asString        varchar(32),
-            primary key (class),
             foreign key (course) references courses,
             foreign key (term) references terms            
         );

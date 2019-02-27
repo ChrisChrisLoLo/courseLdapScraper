@@ -3,6 +3,7 @@ import sqlite3
 #Connect to db file
 def connect(path):
     connection = sqlite3.connect(path)
+    connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(' PRAGMA foreign_keys=ON; ')
     connection.commit()
@@ -16,7 +17,6 @@ def drop_tables(connection, cursor):
         drop table if exists courses;
         drop table if exists classes;
         drop table if exists classTimes;
-        drop table if exists textbooks;
         PRAGMA foreign_keys = ON;
         '''
     cursor.executescript(drop_query)
@@ -61,9 +61,10 @@ def define_tables(connection, cursor):
         );
 
         create table classes (
+            class           INTEGER PRIMARY KEY AUTOINCREMENT,
             term            int,
             course          int,
-            class           int,
+            classCode       int,
             section         varchar(5),
             component       char(3),
             classType       char(1),
@@ -90,7 +91,6 @@ def define_tables(connection, cursor):
             examEndTime     char(8),
             examLocation    varchar(16),
             asString        varchar(32),
-            primary key (class),
             foreign key (course) references courses,
             foreign key (term) references terms            
         );
@@ -111,26 +111,27 @@ def define_tables(connection, cursor):
             foreign key (term) references terms   
             
         );
-
-        create table textbooks (
-            term            int,
-            course          int,
-            class           int,
-            textbook        varchar(16),
-            uOfATxStatus    char(3),
-            uOfATxTitle     varchar(64),
-            uOfATxISBN      char(13),
-            uOfATxAuthor    varchar(32),
-            uOfATxPublisher varchar(32),
-            uOfATxEdition   int,
-            uOfATxYear      int,
-            primary key (textbook),
-            foreign key (class) references classes,
-            foreign key (course) references courses,
-            foreign key (term) references terms   
-        );
-                    
         '''
+        # Too few textbook entries for data to be meaningful
+        # create table textbooks (
+        #     term            int,
+        #     course          int,
+        #     class           int,
+        #     textbook        varchar(16),
+        #     uOfATxStatus    char(3),
+        #     uOfATxTitle     varchar(64),
+        #     uOfATxISBN      char(13),
+        #     uOfATxAuthor    varchar(32),
+        #     uOfATxPublisher varchar(32),
+        #     uOfATxEdition   int,
+        #     uOfATxYear      int,
+        #     primary key (textbook),
+        #     foreign key (class) references classes,
+        #     foreign key (course) references courses,
+        #     foreign key (term) references terms   
+        # );
+                    
+        # '''
     cursor.executescript(table_query)
     connection.commit()
     return
@@ -195,12 +196,14 @@ def insertCourse(attrDict,connection,cursor):
     connection.commit()
     return
 
+#Classes are NOT unique, so a surrogate ID must be added.
 def insertClass(attrDict,connection,cursor):
     print(attrDict)
     cursor.execute('''
-        insert or ignore into classes values
-        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+        insert into classes values
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         ''',(
+            None,   #Autoincrement surrogate ID.
             int(getVal(attrDict,"term")),
             int(getVal(attrDict,"course")),
             int(getVal(attrDict,"class")),
@@ -236,14 +239,30 @@ def insertClass(attrDict,connection,cursor):
 
 def insertClassTime(attrDict,connection,cursor):
     print(attrDict)
+
+    #Find the surrogate class ID that matches the given
+    #term, course, and classCode, since classCodes are not unique
+    cursor.execute('''select * 
+                    from classes
+                    where term = (?)
+                    and course = (?)
+                    and classCode = (?);
+                    ''',(
+                        int(getVal(attrDict,"term")),
+                        int(getVal(attrDict,"course")),
+                        int(getVal(attrDict,"class")),
+                    ))
+
+    classMatch = cursor.fetchone()
+
     cursor.execute('''
-        insert or ignore into classTimes values
-        (?,?,?,?,?,?,?,?,?,?)
+        insert into classTimes values
+        (?,?,?,?,?,?,?,?,?,?);
         ''',(
-            None,               #Use an auto incrementing id
+            None,   #Use an auto incrementing id
             int(getVal(attrDict,"term")),
             int(getVal(attrDict,"course")),
-            int(getVal(attrDict,"class")),
+            int(classMatch["class"]),
             getVal(attrDict,"day"),
             getVal(attrDict,"startTime"),
             getVal(attrDict,"endTime"),
@@ -254,23 +273,23 @@ def insertClassTime(attrDict,connection,cursor):
     connection.commit()
     return
 
-def insertTextbook(attrDict,connection,cursor):
-    print(attrDict)
-    cursor.execute('''
-        insert or ignore into textbooks values
-        (?,?,?,?,?,?,?,?,?,?,?)
-        ''',(
-            int(getVal(attrDict,"term")),
-            int(getVal(attrDict,"course")),
-            int(getVal(attrDict,"class")),
-            getVal(attrDict,"textbook"),
-            getVal(attrDict,"uOfATxStatus",True),
-            getVal(attrDict,"uOfATxTitle",True),
-            getVal(attrDict,"uOfATxISBN",True),
-            getVal(attrDict,"uOfATxAuthor",True),
-            getVal(attrDict,"uOfATxPublisher",True),
-            getVal(attrDict,"uOfATxEdition",True),
-            getVal(attrDict,"uOfATxYear",True),
-        ))
-    connection.commit()
-    return
+# def insertTextbook(attrDict,connection,cursor):
+#     print(attrDict)
+#     cursor.execute('''
+#         insert into textbooks values
+#         (?,?,?,?,?,?,?,?,?,?,?)
+#         ''',(
+#             int(getVal(attrDict,"term")),
+#             int(getVal(attrDict,"course")),
+#             int(getVal(attrDict,"class")),
+#             getVal(attrDict,"textbook"),
+#             getVal(attrDict,"uOfATxStatus",True),
+#             getVal(attrDict,"uOfATxTitle",True),
+#             getVal(attrDict,"uOfATxISBN",True),
+#             getVal(attrDict,"uOfATxAuthor",True),
+#             getVal(attrDict,"uOfATxPublisher",True),
+#             getVal(attrDict,"uOfATxEdition",True),
+#             getVal(attrDict,"uOfATxYear",True),
+#         ))
+#     connection.commit()
+#     return

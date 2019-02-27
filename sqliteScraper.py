@@ -46,8 +46,6 @@ def main():
         insertTerm(termAttr,dbCon,dbCurs)
         termDnList.append(termDn)
     
-
-    
     #Find all children of the terms (courses) and add them to the db
     for termDn in termDnList:
 
@@ -83,15 +81,15 @@ def main():
         for classTimeDn,classTimeAttr in classTimeList:
             insertClassTime(classTimeAttr,dbCon,dbCurs)
 
-        #Find all textbooks in the term and add them to the db
-        textbookList = ldapCon.search_ext_s(termDn,
-                               ldap.SCOPE_SUBTREE,
-                               "(objectClass=uOfATextbook)", 
-                               [],
-                               serverctrls=[page_control])
+        # #Find all textbooks in the term and add them to the db
+        # textbookList = ldapCon.search_ext_s(termDn,
+        #                        ldap.SCOPE_SUBTREE,
+        #                        "(objectClass=uOfATextbook)", 
+        #                        [],
+        #                        serverctrls=[page_control])
 
-        for textbookDn,textbookAttr in textbookList:
-            insertTextbook(textbookAttr,dbCon,dbCurs)
+        # for textbookDn,textbookAttr in textbookList:
+        #     insertTextbook(textbookAttr,dbCon,dbCurs)
 
 
     print("Data collected successfully")

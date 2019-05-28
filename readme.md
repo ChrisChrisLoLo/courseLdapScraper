@@ -17,5 +17,5 @@ There are two things that can be done
     If the file is fairly recent simply take the db file, read the documentation above, and do with the data as you will.
 2) Run the script.
     If the db file is fairly dated, running the script may be necessary. 
-    The script requires both python-ldap as well as sqlite3, and any prerequisites those programs might need. https://www.python-             ldap.org/en/latest/installing.html. 
+    The script requires both python-ldap as well as sqlite3, and any prerequisites those programs might need. https://www.python-ldap.org/en/latest/installing.html. 
     Running the script will generate a new DB file with updated data, which should match information beartracks has, atleast for the next couple of years.

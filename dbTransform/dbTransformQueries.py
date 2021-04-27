@@ -235,20 +235,20 @@ def port_tables(oldDBPath,newCon,newCurs):
         FROM old.classTimes;
         ''')
 
-    newCurs.execute('''
-        INSERT INTO textbooks
-        SELECT
-            class,
-            textbook,
-            uOfATxStatus,
-            uOfATxTitle,
-            uOfATxISBN,
-            uOfATxAuthor,
-            uOfATxPublisher,
-            uOfATxEdition,
-            uOfATxYear
-        FROM old.textbooks;
-        ''')
+    # newCurs.execute('''
+    #     INSERT INTO textbooks
+    #     SELECT
+    #         class,
+    #         textbook,
+    #         uOfATxStatus,
+    #         uOfATxTitle,
+    #         uOfATxISBN,
+    #         uOfATxAuthor,
+    #         uOfATxPublisher,
+    #         uOfATxEdition,
+    #         uOfATxYear
+    #     FROM old.textbooks;
+    #     ''')
     newCon.commit()
     return
 

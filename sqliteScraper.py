@@ -3,7 +3,7 @@ import sqlite3
 from sqliteQueries import *
 
 
-#Create and configure LDAP connection
+# Create and configure LDAP connection
 DOMAIN = "ldaps://directory.srv.ualberta.ca"
 ROOT_DN="ou=calendar,dc=ualberta,dc=ca"
 ldap.set_option(ldap.OPT_SIZELIMIT,20000)
@@ -11,13 +11,13 @@ ldap.set_option(ldap.OPT_SIZELIMIT,20000)
 page_control = ldap.controls.libldap.SimplePagedResultsControl(True, size=20000, cookie='')
 
 
-#Create and initialize sqlite db
+# Create and initialize sqlite db
 dbCon,dbCurs = connect("./calendar.db")
 drop_tables(dbCon,dbCurs)
 define_tables(dbCon,dbCurs)
 
 def main():
-    #If this line fails then the service is likely gone or moved
+    # If this line fails then the service is likely gone or moved
     ldapCon = ldap.initialize(DOMAIN)
 
     '''
@@ -35,23 +35,25 @@ def main():
     print(ldapCon.compare_s(dn,"term", b"1326"))
     '''
 
-    #initialize list
+    # initialize list
     termDnList = []
 
-    #Find all terms add them to the db
-    termList = ldapCon.search_s(ROOT_DN,ldap.SCOPE_ONELEVEL)
+    # Find all terms add them to the db
+    # Get the last 6 entries as they are the latest terms
+    termList = ldapCon.search_s(ROOT_DN,ldap.SCOPE_ONELEVEL)[-6:]
+    # print(termList)
     for termDn,termAttr in termList:
 
-        #Use the attribute dictionary for each term into insertTerm
+        # Use the attribute dictionary for each term into insertTerm
         insertTerm(termAttr,dbCon,dbCurs)
         termDnList.append(termDn)
     
-    #Find all children of the terms (courses) and add them to the db
+    # Find all children of the terms (courses) and add them to the db
     for termDn in termDnList:
 
-        #There can be over 1000 entries for courses, so must use pagination to get results.
-        #For some reason it is possible to abuse pagination by having a page size > 1000 and
-        #not have the script throw a max results error, so this is not typical pagination.
+        # There can be over 1000 entries for courses, so must use pagination to get results.
+        # For some reason it is possible to abuse pagination by having a page size > 1000 and
+        # not have the script throw a max results error, so this is not typical pagination.
         courseList = ldapCon.search_ext_s(termDn,
                                ldap.SCOPE_ONELEVEL,
                                "(objectClass=uOfACourse)", 
@@ -61,7 +63,7 @@ def main():
         for courseDn,courseAttr in courseList:
             insertCourse(courseAttr,dbCon,dbCurs)
     
-        #Find all classes of each term and add them to the db
+        # Find all classes of each term and add them to the db
         classList = ldapCon.search_ext_s(termDn,
                                ldap.SCOPE_SUBTREE,
                                "(objectClass=uOfAClass)", 
@@ -71,7 +73,7 @@ def main():
         for classDn,classAttr in classList:
             insertClass(classAttr,dbCon,dbCurs)
 
-        #Find all classTimes in the term and add them to the db
+        # Find all classTimes in the term and add them to the db
         classTimeList = ldapCon.search_ext_s(termDn,
                                ldap.SCOPE_SUBTREE,
                                "(objectClass=uOfAClassTime)", 
